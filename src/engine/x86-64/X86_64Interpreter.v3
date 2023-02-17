@@ -2076,18 +2076,17 @@ class X86_64InterpreterGen(ic: X86_64InterpreterCode, w: DataWriter) {
 			endHandler();
 		}
 		for (t in [
-			// (Opcode.V128_ADD, asm.addss_s_s),
-			// (Opcode.V128_SUB, asm.q.sub_m_r),
 			(Opcode.V128_AND, asm.andps_s_s),
+			// _ques: what's the asm method?
 			// (Opcode.V128_OR, asm.q.or_m_r),
 			(Opcode.V128_XOR, asm.xorps_s_s)
 		]) {
 			bindHandler(t.0);
 			asm.movdqu_s_m(regs.xmm0, vsph[-1].value);
-			asm.movdqu_s_m(regs.xmm1, vsph[-3].value);
+			asm.movdqu_s_m(regs.xmm1, vsph[-2].value);
 			t.1(regs.xmm0, regs.xmm1);
-			asm.movdqu_m_s(vsph[-4].value, regs.xmm0);
-			asm.q.sub_r_i(vsp, 2 * valuerep.slot_size);
+			asm.movdqu_m_s(vsph[-2].value, regs.xmm0);
+			asm.q.sub_r_i(vsp, valuerep.slot_size);
 			endHandler();
 		}
 		bindHandler(Opcode.V128_NOT); {
