@@ -816,6 +816,11 @@ class X86_64MacroAssembler extends MacroAssembler {
 		asm.pshufb_s_s(xtmp1, xtmp2);
 		asm.paddb_s_s(dst, xtmp1);
 	}
+	def emit_v128_anytrue(r: X86_64Gpr, s: X86_64Xmmr) {
+		asm.ptest_s_s(s, s);
+		asm.set_r(C.NZ, r);
+		asm.movbzx_r_r(r, r);
+	}
 	def getLabel(m: MasmLabel) -> X86_64Label {
 		return X86_64MasmLabel.!(m).label;
 	}
