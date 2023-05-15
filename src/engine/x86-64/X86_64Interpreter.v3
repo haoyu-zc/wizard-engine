@@ -2163,6 +2163,15 @@ class X86_64InterpreterGen(ic: X86_64InterpreterCode, w: DataWriter) {
 			(Opcode.I16X8_MUL, asm.pmullw_s_s),
 			(Opcode.I32X4_MUL, asm.pmulld_s_s),
 
+			(Opcode.F32X4_ADD, asm.addps_s_s),
+			(Opcode.F64X2_ADD, asm.addpd_s_s),
+			(Opcode.F32X4_SUB, asm.subps_s_s),
+			(Opcode.F64X2_SUB, asm.subpd_s_s),
+			(Opcode.F32X4_MUL, asm.mulps_s_s),
+			(Opcode.F64X2_MUL, asm.mulpd_s_s),
+			(Opcode.F32X4_DIV, asm.divps_s_s),
+			(Opcode.F64X2_DIV, asm.divpd_s_s),
+
 			(Opcode.I8X16_MIN_S, asm.pminsb_s_s),
 			(Opcode.I16X8_MIN_S, asm.pminsw_s_s),
 			(Opcode.I32X4_MIN_S, asm.pminsd_s_s),
