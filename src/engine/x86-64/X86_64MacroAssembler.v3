@@ -726,17 +726,37 @@ class X86_64MacroAssembler extends MacroAssembler {
 	def emit_i64_extend_i32_u(r: X86_64Gpr) {
 		asm.movd_r_r(r, r);
 	}
-	def emit_v128_xorps(dst: X86_64Xmmr, src: X86_64Xmmr) {
+	def emit_v128_pxor(dst: X86_64Xmmr, src: X86_64Xmmr) {
 		asm.xorps_s_s(dst, src);
 	}
+	def emit_v128_pand(dst: X86_64Xmmr, src: X86_64Xmmr) {
+		asm.andps_s_s(dst, src);
+	}
 	def emit_v128_zero(s: X86_64Xmmr) {
-		emit_v128_xorps(s, s);
+		emit_v128_pxor(s, s);
 	}
 	def emit_i64x2_ge_s(s0: X86_64Xmmr, s1: X86_64Xmmr, scratch: X86_64Xmmr) {
 		asm.pcmpgtq_s_s(s1, s0);
 		asm.pcmpeqd_s_s(scratch, scratch);
-		emit_v128_xorps(s1, scratch); // The result is stored in s1
+		emit_v128_pxor(s1, scratch); // The result is stored in s1
 	}
+	def emit_i8x16_shl(dst: X86_64Xmmr, disp: X86_64Gpr, tmp1: X86_64Gpr, tmp2: X86_64Xmmr, tmp3: X86_64Xmmr) {
+		// Take shift value modulo 8.
+		asm.movd_r_r(tmp1, disp);
+		asm.and_r_i(tmp1, 0x7);
+		asm.add_r_i(tmp1, 0x8);
+		// Create a mask to unset high bits.
+		asm.movd_s_r(tmp3, tmp1);
+		asm.pcmpeqd_s_s(tmp2, tmp2);
+		asm.psrlw_s_s(tmp2, tmp3);
+		asm.packuswb_s_s(tmp2, tmp2);
+		// Mask off the unwanted bits before word-shifting.
+		emit_v128_pand(dst, tmp2);
+		asm.add_r_i(tmp1, -0x8);
+		asm.movd_s_r(tmp3, tmp1);
+		asm.psllw_s_s(dst, tmp3);
+	}
+
 	def getLabel(m: MasmLabel) -> X86_64Label {
 		return X86_64MasmLabel.!(m).label;
 	}
