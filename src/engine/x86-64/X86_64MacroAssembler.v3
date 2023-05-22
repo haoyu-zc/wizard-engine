@@ -878,9 +878,20 @@ class X86_64MacroAssembler extends MacroAssembler {
 		asm.minpd_s_s(scratch, dst);
 		asm.minpd_s_s(dst, src);
 		asm.orpd_s_s(scratch, dst);
-		asm.cmpunordps_s_s(dst, scratch);
+		asm.cmpunordpd_s_s(dst, scratch);
 		asm.orpd_s_s(scratch, dst);
-		asm.psrld_i(dst, 13);
+		asm.psrlq_i(dst, 13);
+		asm.andnpd_s_s(dst, scratch);
+	}
+	def emit_f64x2_max(dst: X86_64Xmmr, src: X86_64Xmmr, scratch: X86_64Xmmr) {
+		asm.movaps_s_s(scratch, src);
+		asm.maxpd_s_s(scratch, dst);
+		asm.maxpd_s_s(dst, src);
+		asm.xorpd_s_s(dst, scratch);
+		asm.orpd_s_s(scratch, dst);
+		asm.subpd_s_s(scratch, dst);
+		asm.cmpunordpd_s_s(dst, scratch);
+		asm.psrlq_i(dst, 13);
 		asm.andnpd_s_s(dst, scratch);
 	}
 	def getLabel(m: MasmLabel) -> X86_64Label {

@@ -2249,8 +2249,8 @@ class X86_64InterpreterGen(ic: X86_64InterpreterCode, w: DataWriter) {
 		for (t in [
 			(Opcode.F32X4_MIN, masm.emit_f32x4_min),
 			(Opcode.F64X2_MIN, masm.emit_f64x2_min),
-			(Opcode.F32X4_MAX, masm.emit_f32x4_max)
-			// (Opcode.F64X2_MAX, masm.emit_f64x2_max)
+			(Opcode.F32X4_MAX, masm.emit_f32x4_max),
+			(Opcode.F64X2_MAX, masm.emit_f64x2_max)
 		]) {
 			bindHandler(t.0);
 			load_v128_xmm0_xmm1();
