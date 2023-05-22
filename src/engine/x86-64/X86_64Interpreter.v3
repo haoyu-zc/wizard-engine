@@ -2387,9 +2387,9 @@ class X86_64InterpreterGen(ic: X86_64InterpreterCode, w: DataWriter) {
 			endHandler();
 		}
 		bindHandler(Opcode.V128_ANYTRUE); {
-			asm.movdqu_s_m(regs.xmm0, vsph[-1].value);
-			masm.emit_v128_anytrue(regs.tmp0, regs.xmm0);
-			asm.movd_m_r(vsph[-1].value, regs.tmp0);
+			asm.movdqu_s_m(r_xmm0, vsph[-1].value);
+			masm.emit_v128_anytrue(r_tmp0, r_xmm0);
+			asm.movd_m_r(vsph[-1].value, r_tmp0);
 			genTagUpdate(BpTypeCode.I32.code);
 			endHandler();
 		}

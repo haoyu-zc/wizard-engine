@@ -821,6 +821,9 @@ class X86_64MacroAssembler extends MacroAssembler {
 		asm.set_r(C.NZ, r);
 		asm.movbzx_r_r(r, r);
 	}
+	def funct(f: (X86_64Xmmr, X86_64Xmmr) -> void) {
+		
+	}
 	def getLabel(m: MasmLabel) -> X86_64Label {
 		return X86_64MasmLabel.!(m).label;
 	}
