@@ -2514,8 +2514,29 @@ class X86_64InterpreterGen(ic: X86_64InterpreterCode, w: DataWriter) {
 			asm.addps_s_s(dst, dst);
 			asm.addps_s_s(dst, scratch);
 			asm.movdqu_m_s(vsph[-1].value, r_xmm0);
+		}
+		for (t in [
+			(Opcode.I32X4_EXTRACTLANE, asm.movd_r_m)
+			// (Opcode.I64X2_EXTRACTLANE, asm.movq_r_m)
+		]) {
+			bindHandler(t.0);
+			// load imm (one byte)
+			asm.movb_r_m(r_tmp0, ip_ptr);
+			// increment IP by 1
+			asm.q.add_r_i(r_ip, 1);
+			// extract the lane from the value stack
+			t.1(r_tmp1, vsph[-1].value.plusR(r_tmp0, 4, 0));
+			asm.movd_m_r(vsph[-1].value, r_tmp1);
+			genTagUpdate(BpTypeCode.I32.code);
 			endHandler();
 		}
+		// for (t in [
+		// 	(Opcode.V128_LOAD_8_LANE)
+		// ]) {
+		// 	bindHandler(t);
+
+		// 	endHandler();
+		// }
 		bindHandler(Opcode.V128_CONST); {
 			asm.movdqu_s_m(r_xmm0, ip_ptr);
 			asm.q.add_r_i(r_ip, 16);
