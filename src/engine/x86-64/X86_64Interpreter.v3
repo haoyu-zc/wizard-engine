@@ -243,6 +243,7 @@ class IntExecEnv {
 	var xmm1: Reg;
 	var xmm2: Reg;
 	var xmm3: Reg;
+	var xmm4: Reg;
 	var tmp0: Reg;
 	var tmp1: Reg;
 	var tmp2: Reg;
@@ -332,6 +333,7 @@ class X86_64InterpreterGen(ic: X86_64InterpreterCode, w: DataWriter) {
 	def r_xmm1		= X(xenv.xmm1);
 	def r_xmm2		= X(xenv.xmm2);
 	def r_xmm3		= X(xenv.xmm3);
+	def r_xmm4		= X(xenv.xmm4);
 
 	def ip_ptr		= r_ip.plus(0);
 
@@ -2547,6 +2549,68 @@ class X86_64InterpreterGen(ic: X86_64InterpreterCode, w: DataWriter) {
 			asm.q.lea(r_tmp1, vsph[-1].value);
 			// extract the lane from the value stack
 			extract_v128_lane(t, vsph[-1].value, r_tmp1, r_tmp0);
+			endHandler();
+		}
+		bindHandler(Opcode.I8X16_SHUFFLE); {
+			def lhs = r_xmm0;
+			def rhs = r_xmm1;
+			def lanes = r_xmm2; // specified by the immediate array
+			def mask = r_xmm3;
+			// def scratch = r_xmm4;
+			def lane = r_tmp0; // lane index specified by the imm mask
+			def val = r_tmp1; // lane value of mask
+			def tmp = r_tmp2;
+			def SIMD_128_SIZE = 16;
+			// Read the vectors from the value stack
+			asm.movdqu_s_m(lhs, vsph[-2].value);
+			asm.movdqu_s_m(rhs, vsph[-1].value);
+			// Read the mask from the instruction stream
+			asm.movdqu_s_m(lanes, ip_ptr);
+			asm.q.add_r_i(r_ip, 16);
+			// Initilize mask to 0 (uint64_t mask1[2] = {};)
+			asm.xorps_s_s(mask, mask);
+			// Construct a temp mask
+			for (i: byte = 15; i >= 0; i--) {
+				asm.pextrb_r_s_i(lane, mask, i);
+				var j: byte = (i >> 3);
+				// val = mask[j]
+				asm.pextrq_r_s_i(val, mask, j);
+				// (mask[j] <<= 8;)
+				asm.shl_r_i(val, 8);
+				// mask[j] |= lane < SIMD_128_SIZE ? lane : 0x80;
+				asm.cmp_r_i(lane, SIMD_128_SIZE);
+				asm.movq_r_i(tmp, 0x80);
+				asm.cmov_r(X86_64Conds.GE, lane, tmp);
+				asm.or_r_i(val, lane);
+				// Actually assgin val to mask[j]
+				asm.pinsrq_s_r_i(mask, val, j);
+			}
+			// Shuffle
+			asm.pshufb_s_s(lhs, mask);
+
+			// Construct a temp mask again
+			for (i: byte = 15; i >= 0; i--) {
+				asm.pextrb_r_s_i(lane, mask, i);
+				var j: byte = (i >> 3);
+				// val = mask[j]
+				asm.pextrq_r_s_i(val, mask, j);
+				// (mask[j] <<= 8;)
+				asm.shl_r_i(val, 8);
+				// mask[j] |= lane >= SIMD_128_SIZE ? (lane & 0x0F) : 0x80;
+				asm.cmp_r_i(lane, SIMD_128_SIZE);
+				asm.and_r_i(lane, 0x0F);
+				asm.movq_r_i(tmp, 0x80);
+				asm.cmov_r(X86_64Conds.LT, lane, tmp);
+				asm.or_r_i(val, lane);
+				// Actually assgin val to mask[j]
+				asm.pinsrq_s_r_i(mask, val, j);
+			}
+			// Shuffle
+			asm.pshufb_s_s(rhs, mask);
+			asm.pxor_s_s(lhs, rhs);
+			// Return
+			asm.movdqu_m_s(vsph[-2].value, lhs);
+			decrementVsp();
 			endHandler();
 		}
 		bindHandler(Opcode.V128_CONST); {
