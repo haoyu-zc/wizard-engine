@@ -2581,7 +2581,7 @@ class X86_64InterpreterGen(ic: X86_64InterpreterCode, w: DataWriter) {
 				asm.cmp_r_i(lane, SIMD_128_SIZE);
 				asm.movq_r_i(tmp, 0x80);
 				asm.cmov_r(X86_64Conds.GE, lane, tmp);
-				asm.or_r_i(val, lane);
+				asm.or_r_r(val, lane);
 				// Actually assgin val to mask[j]
 				asm.pinsrq_s_r_i(mask, val, j);
 			}
@@ -2601,7 +2601,7 @@ class X86_64InterpreterGen(ic: X86_64InterpreterCode, w: DataWriter) {
 				asm.and_r_i(lane, 0x0F);
 				asm.movq_r_i(tmp, 0x80);
 				asm.cmov_r(X86_64Conds.LT, lane, tmp);
-				asm.or_r_i(val, lane);
+				asm.or_r_r(val, lane);
 				// Actually assgin val to mask[j]
 				asm.pinsrq_s_r_i(mask, val, j);
 			}
