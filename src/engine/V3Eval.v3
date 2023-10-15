@@ -337,6 +337,24 @@ component V3Eval {
 	def I16X8_NEG(a: (u64, u64)) -> (u64, u64) {
 		return do_vv_v_x8((0, 0), a, u16.-);
 	}
+	def I16X8_MIN_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x8(a, b, V128_I16_MIN_S);
+	}
+	def I16X8_MIN_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x8(a, b, I16_MIN_U);
+	}
+	def I16X8_MAX_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x8(a, b, V128_I16_MAX_S);
+	}
+	def I16X8_MAX_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x8(a, b, I16_MAX_U);
+	}
+	def I16X8_AVGR_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x8(a, b, I16_AVGR_U);
+	}
+	def I16X8_ABS(a: (u64, u64)) -> (u64, u64) {
+		return do_v_v_x8(a, V128_I16_ABS);
+	}
 	def I8X16_ADD(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
 		return do_vv_v_x16(a, b, u8.+);
 	}
@@ -406,12 +424,25 @@ component V3Eval {
 
 	// ---- v128 arithmetic helpers ----------------------------------------
 	private def V128_I8_MIN_S = i8_s_binop(_, _, I8_MIN_S);
+	private def V128_I16_MIN_S = i16_s_binop(_, _, I16_MIN_S);
+	private def V128_I8_MAX_S = i8_s_binop(_, _, I8_MAX_S);
+	private def V128_I16_MAX_S = i16_s_binop(_, _, I16_MAX_S);
+	private def V128_I8_ABS = i8_s_unop(_, I8_ABS_S);
+	private def V128_I16_ABS = i16_s_unop(_, I16_ABS_S);
+	
 	private def I8_MIN_S(a: i8, b: i8) -> i8 {
 		if (a <= b) return a;
 		else return b;
 	}
-	private def V128_I8_MAX_S = i8_s_binop(_, _, I8_MAX_S);
+	private def I16_MIN_S(a: i16, b: i16) -> i16 {
+		if (a <= b) return a;
+		else return b;
+	}
 	private def I8_MAX_S(a: i8, b: i8) -> i8 {
+		if (a >= b) return a;
+		else return b;
+	}
+	private def I16_MAX_S(a: i16, b: i16) -> i16 {
 		if (a >= b) return a;
 		else return b;
 	}
@@ -419,7 +450,15 @@ component V3Eval {
 		if (a <= b) return a;
 		else return b;
 	}
+	private def I16_MIN_U(a: u16, b: u16) -> u16 {
+		if (a <= b) return a;
+		else return b;
+	}
 	private def I8_MAX_U(a: u8, b: u8) -> u8 {
+		if (a >= b) return a;
+		else return b;
+	}
+	private def I16_MAX_U(a: u16, b: u16) -> u16 {
 		if (a >= b) return a;
 		else return b;
 	}
@@ -428,8 +467,16 @@ component V3Eval {
 		var sum = u16.view(a) + u16.view(b);
 		return u8.view((sum + 1) / 2);
 	}
-	private def V128_I8_ABS = i8_s_unop(_, I8_ABS_S);
+	private def I16_AVGR_U(a: u16, b: u16) -> u16 {
+		// rounding average
+		var sum = u32.view(a) + u32.view(b);
+		return u16.view((sum + 1) / 2);
+	}
 	private def I8_ABS_S(a: i8) -> i8 {
+		if (a < 0) return -a;
+		else return a;
+	}
+	private def I16_ABS_S(a: i16) -> i16 {
 		if (a < 0) return -a;
 		else return a;
 	}
@@ -532,6 +579,24 @@ component V3Eval {
 	}
 	private def i8_s_unop(a: u8, f: i8 -> i8) -> u8 {  // Adapts a signed i8 unop to a u8 unop
 		return u8.view(f(i8.view(a)));
+	}
+	private def i16_s_binop(a: u16, b: u16, f: (i16, i16) -> i16) -> u16 {  // Adapts a signed i16 binop to a u16 binop
+		return u16.view(f(i16.view(a), i16.view(b)));
+	}
+	private def i16_s_unop(a: u16, f: i16 -> i16) -> u16 {  // Adapts a signed i16 unop to a u16 unop
+		return u16.view(f(i16.view(a)));
+	}
+	private def i32_s_binop(a: u32, b: u32, f: (i32, i32) -> i32) -> u32 {  // Adapts a signed i32 binop to a u32 binop
+		return u32.view(f(i32.view(a), i32.view(b)));
+	}
+	private def i32_s_unop(a: u32, f: i32 -> i32) -> u32 {  // Adapts a signed i32 unop to a u32 unop
+		return u32.view(f(i32.view(a)));
+	}
+	private def i64_s_binop(a: u64, b: u64, f: (i64, i64) -> i64) -> u64 {  // Adapts a signed i64 binop to a u64 binop
+		return u64.view(f(i64.view(a), i64.view(b)));
+	}
+	private def i64_s_unop(a: u64, f: i64 -> i64) -> u64 {  // Adapts a signed i64 unop to a u64 unop
+		return u64.view(f(i64.view(a)));
 	}
 	private def float_binop(a: u32, b: u32, f: (float, float) -> float) -> u32 {  // Adapts a floating point binop to a u32 binop
 		return u32.view(f(float.view(a), float.view(b)));
