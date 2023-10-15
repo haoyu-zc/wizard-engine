@@ -346,6 +346,27 @@ component V3Eval {
 	def I8X16_NEG(a: (u64, u64)) -> (u64, u64) {
 		return do_vv_v_x16((0, 0), a, u8.-);
 	}
+	def I8X16_MIN_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x16(a, b, V128_I8_MIN_S);
+	}
+	def I8X16_MIN_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x16(a, b, I8_MIN_U);
+	}
+	def I8X16_MAX_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x16(a, b, V128_I8_MAX_S);
+	}
+	def I8X16_MAX_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x16(a, b, I8_MAX_U);
+	}
+	def I8X16_AVGR_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x16(a, b, I8_AVGR_U);
+	}
+	def I8X16_ABS(a: (u64, u64)) -> (u64, u64) {
+		return do_v_v_x16(a, V128_I8_ABS);
+	}
+	def I8X16_POPCNT(a: (u64, u64)) -> (u64, u64) {
+		return do_v_v_x16(a, I8_POPCNT);
+	}
 	def F32X4_ADD(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
 		return do_vv_v_x4(a, b, F32_ADD_U);
 	}
@@ -384,6 +405,43 @@ component V3Eval {
 	}
 
 	// ---- v128 arithmetic helpers ----------------------------------------
+	private def V128_I8_MIN_S = i8_s_binop(_, _, I8_MIN_S);
+	private def I8_MIN_S(a: i8, b: i8) -> i8 {
+		if (a <= b) return a;
+		else return b;
+	}
+	private def V128_I8_MAX_S = i8_s_binop(_, _, I8_MAX_S);
+	private def I8_MAX_S(a: i8, b: i8) -> i8 {
+		if (a >= b) return a;
+		else return b;
+	}
+	private def I8_MIN_U(a: u8, b: u8) -> u8 {
+		if (a <= b) return a;
+		else return b;
+	}
+	private def I8_MAX_U(a: u8, b: u8) -> u8 {
+		if (a >= b) return a;
+		else return b;
+	}
+	private def I8_AVGR_U(a: u8, b: u8) -> u8 {
+		// rounding average
+		var sum = u16.view(a) + u16.view(b);
+		return u8.view((sum + 1) / 2);
+	}
+	private def V128_I8_ABS = i8_s_unop(_, I8_ABS_S);
+	private def I8_ABS_S(a: i8) -> i8 {
+		if (a < 0) return -a;
+		else return a;
+	}
+	private def I8_POPCNT(a: u8) -> u8 {
+		var count:byte = 0;
+		for (i < 8) {
+			if ((a & 1) == 1) count++;
+			a >>= 1;
+		}
+		return count;
+	}
+
 	private def F32_ADD_U = float_binop(_, _, float.+);
 	private def F32_SUB_U = float_binop(_, _, float.-);
 	private def F32_MUL_U = float_binop(_, _, float.*);
@@ -469,6 +527,12 @@ component V3Eval {
 			_ => return val;
 		}
 	}
+	private def i8_s_binop(a: u8, b: u8, f: (i8, i8) -> i8) -> u8 {  // Adapts a signed i8 binop to a u8 binop
+		return u8.view(f(i8.view(a), i8.view(b)));
+	}
+	private def i8_s_unop(a: u8, f: i8 -> i8) -> u8 {  // Adapts a signed i8 unop to a u8 unop
+		return u8.view(f(i8.view(a)));
+	}
 	private def float_binop(a: u32, b: u32, f: (float, float) -> float) -> u32 {  // Adapts a floating point binop to a u32 binop
 		return u32.view(f(float.view(a), float.view(b)));
 	}
@@ -492,6 +556,38 @@ component V3Eval {
 		var r2 = f(u32.view(a.1));
 		var r3 = f(u32.view(a.1 >> 32));
 		return ((u64.view(r1) << 32) | r0, (u64.view(r3) << 32) | r2);
+	}
+	private def do_v_v_x8(a: (u64, u64), f: (u16) -> u16) -> (u64, u64) { // Performs an 8-lane unop
+		var low: u64 = 0;
+		var high: u64 = 0;
+
+		for (shift: byte = 0; shift < 64; shift += 16) {
+			var r_a = u16.view((a.0 >> shift) & 0xFFFF);
+			var res = f(r_a);
+			low |= (u64.view(res) << shift);
+			
+			r_a = u16.view((a.1 >> shift) & 0xFFFF);
+			res = f(r_a);
+			high |= (u64.view(res) << shift);
+		}
+
+		return (low, high);
+	}
+	private def do_v_v_x16(a: (u64, u64), f: (u8) -> u8) -> (u64, u64) { // Performs a 16-lane unop
+		var low: u64 = 0;
+		var high: u64 = 0;
+
+		for (shift: byte = 0; shift < 64; shift += 8) {
+			var r_a = u8.view((a.0 >> shift) & 0xFF);
+			var res = f(r_a);
+			low |= (u64.view(res) << shift);
+			
+			r_a = u8.view((a.1 >> shift) & 0xFF);
+			res = f(r_a);
+			high |= (u64.view(res) << shift);
+		}
+
+		return (low, high);
 	}
 	private def do_vv_v_x2(a: (u64, u64), b: (u64, u64), f: (u64, u64) -> u64) -> (u64, u64) { // Performs a 2-lane binop
 		var r0 = f(a.0, b.0);
