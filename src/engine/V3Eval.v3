@@ -316,6 +316,24 @@ component V3Eval {
 	def I64X2_ABS(a: (u64, u64)) -> (u64, u64) {
 		return do_v_v_x2(a, V128_I64_ABS);
 	}
+	def I64X2_EQ(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x2(a, b, V128_I64X2_EQ);
+	}
+	def I64X2_NE(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x2(a, b, V128_I64X2_NE);
+	}
+	def I64X2_LT_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x2(a, b, V128_I64X2_LT_S);
+	}
+	def I64X2_LE_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x2(a, b, V128_I64X2_LE_S);
+	}
+	def I64X2_GT_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return I64X2_LT_S(b, a);
+	}
+	def I64X2_GE_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return I64X2_LE_S(b, a);
+	}
 	def I32X4_ADD(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
 		return do_vv_v_x4(a, b, u32.+);
 	}
@@ -342,6 +360,36 @@ component V3Eval {
 	}
 	def I32X4_ABS(a: (u64, u64)) -> (u64, u64) {
 		return do_v_v_x4(a, V128_I32_ABS);
+	}
+	def I32X4_EQ(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x4(a, b, V128_I32X4_EQ);
+	}
+	def I32X4_NE(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x4(a, b, V128_I32X4_NE);
+	}
+	def I32X4_LT_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x4(a, b, V128_I32X4_LT_S);
+	}
+	def I32X4_LT_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x4(a, b, V128_I32X4_LT_U);
+	}
+	def I32X4_LE_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x4(a, b, V128_I32X4_LE_S);
+	}
+	def I32X4_LE_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x4(a, b, V128_I32X4_LE_U);
+	}
+	def I32X4_GT_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return I32X4_LT_S(b, a);
+	}
+	def I32X4_GT_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return I32X4_LT_U(b, a);
+	}
+	def I32X4_GE_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return I32X4_LE_S(b, a);
+	}
+	def I32X4_GE_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return I32X4_LE_U(b, a);
 	}
 	def I16X8_ADD(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
 		return do_vv_v_x8(a, b, u16.+);
@@ -372,6 +420,36 @@ component V3Eval {
 	}
 	def I16X8_ABS(a: (u64, u64)) -> (u64, u64) {
 		return do_v_v_x8(a, V128_I16_ABS);
+	}
+	def I16X8_EQ(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x8(a, b, V128_I16X8_EQ);
+	}
+	def I16X8_NE(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x8(a, b, V128_I16X8_NE);
+	}
+	def I16X8_LT_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x8(a, b, V128_I16X8_LT_S);
+	}
+	def I16X8_LT_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x8(a, b, V128_I16X8_LT_U);
+	}
+	def I16X8_LE_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x8(a, b, V128_I16X8_LE_S);
+	}
+	def I16X8_LE_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return do_vv_v_x8(a, b, V128_I16X8_LE_U);
+	}
+	def I16X8_GT_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return I16X8_LT_S(b, a);
+	}
+	def I16X8_GT_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return I16X8_LT_U(b, a);
+	}
+	def I16X8_GE_S(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return I16X8_LE_S(b, a);
+	}
+	def I16X8_GE_U(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
+		return I16X8_LE_U(b, a);
 	}
 	def I8X16_ADD(a: (u64, u64), b: (u64, u64)) -> (u64, u64) {
 		return do_vv_v_x16(a, b, u8.+);
@@ -488,6 +566,22 @@ component V3Eval {
 	private def V128_I8X16_LT_U = u8_bool_binop(_, _, u8.<);
 	private def V128_I8X16_LE_S = i8_bool_binop(_, _, i8.<=);
 	private def V128_I8X16_LE_U = u8_bool_binop(_, _, u8.<=);
+	private def V128_I16X8_EQ = u16_bool_binop(_, _, u16.==);
+	private def V128_I16X8_NE = u16_bool_binop(_, _, u16.!=);
+	private def V128_I16X8_LT_S = i16_bool_binop(_, _, i16.<);
+	private def V128_I16X8_LT_U = u16_bool_binop(_, _, u16.<);
+	private def V128_I16X8_LE_S = i16_bool_binop(_, _, i16.<=);
+	private def V128_I16X8_LE_U = u16_bool_binop(_, _, u16.<=);
+	private def V128_I32X4_EQ = u32_bool_binop(_, _, u32.==);
+	private def V128_I32X4_NE = u32_bool_binop(_, _, u32.!=);
+	private def V128_I32X4_LT_S = i32_bool_binop(_, _, i32.<);
+	private def V128_I32X4_LT_U = u32_bool_binop(_, _, u32.<);
+	private def V128_I32X4_LE_S = i32_bool_binop(_, _, i32.<=);
+	private def V128_I32X4_LE_U = u32_bool_binop(_, _, u32.<=);
+	private def V128_I64X2_EQ = u64_bool_binop(_, _, u64.==);
+	private def V128_I64X2_NE = u64_bool_binop(_, _, u64.!=);
+	private def V128_I64X2_LT_S = i64_bool_binop(_, _, i64.<);
+	private def V128_I64X2_LE_S = i64_bool_binop(_, _, i64.<=);
 
 	private def I8_MIN_S(a: i8, b: i8) -> i8 {
 		if (a <= b) return a;
@@ -658,10 +752,28 @@ component V3Eval {
 		}
 	}
 	private def u8_bool_binop(a: u8, b: u8, f: (u8, u8) -> bool) -> u8 {  // Adapts a unsigned bool binop to a u8 binop
-		return u8.view(if (f(a, b), u8.max, 0));
+		return if (f(a, b), u8.max, u8.view(0));
+	}
+	private def u16_bool_binop(a: u16, b: u16, f: (u16, u16) -> bool) -> u16 {  // Adapts a unsigned bool binop to a u16 binop
+		return if (f(a, b), u16.max, u16.view(0));
+	}
+	private def u32_bool_binop(a: u32, b: u32, f: (u32, u32) -> bool) -> u32 {  // Adapts a unsigned bool binop to a u32 binop
+		return if (f(a, b), u32.max, u32.view(0));
+	}
+	private def u64_bool_binop(a: u64, b: u64, f: (u64, u64) -> bool) -> u64 {  // Adapts a unsigned bool binop to a u64 binop
+		return if (f(a, b), u64.max, u64.view(0));
 	}
 	private def i8_bool_binop(a: u8, b: u8, f: (i8, i8) -> bool) -> u8 {  // Adapts a signed bool binop to a u8 binop
-		return u8.view(if (f(i8.view(a), i8.view(b)), u8.max, 0));
+		return if (f(i8.view(a), i8.view(b)), u8.max, u8.view(0));
+	}
+	private def i16_bool_binop(a: u16, b: u16, f: (i16, i16) -> bool) -> u16 {  // Adapts a signed bool binop to a u16 binop
+		return if (f(i16.view(a), i16.view(b)), u16.max, u16.view(0));
+	}
+	private def i32_bool_binop(a: u32, b: u32, f: (i32, i32) -> bool) -> u32 {  // Adapts a signed bool binop to a u32 binop
+		return if (f(i32.view(a), i32.view(b)), u32.max, u32.view(0));
+	}
+	private def i64_bool_binop(a: u64, b: u64, f: (i64, i64) -> bool) -> u64 {  // Adapts a signed bool binop to a u64 binop
+		return if (f(i64.view(a), i64.view(b)), u64.max, u64.view(0));
 	}
 	private def i8_s_binop(a: u8, b: u8, f: (i8, i8) -> i8) -> u8 {  // Adapts a signed i8 binop to a u8 binop
 		return u8.view(f(i8.view(a), i8.view(b)));
