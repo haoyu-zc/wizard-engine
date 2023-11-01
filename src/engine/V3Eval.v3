@@ -385,6 +385,11 @@ component V3Eval {
 	def F32X4_LE = do_vv_v_x4(_, _, V128_F32X4_LE);
 	def F32X4_GT = commute_binop(F32X4_LT);
 	def F32X4_GE = commute_binop(F32X4_LE);
+	def F32X4_MIN = do_vv_v_x4(_, _, V128_F32X4_MIN);
+	def F32X4_MAX = do_vv_v_x4(_, _, V128_F32X4_MAX);
+	def F32X4_ABS = do_v_v_x4(_, V128_F32X4_ABS);
+	def F32X4_PMIN = do_vv_v_x4(_, _, V128_F32X4_PMIN);
+	def F32X4_PMAX = do_vv_v_x4(_, _, V128_F32X4_PMAX);
 	def F64X2_ADD = do_vv_v_x2(_, _, F64_ADD_U);
 	def F64X2_SUB = do_vv_v_x2(_, _, F64_SUB_U);
 	def F64X2_MUL = do_vv_v_x2(_, _, F64_MUL_U);
@@ -397,6 +402,11 @@ component V3Eval {
 	def F64X2_LE = do_vv_v_x2(_, _, V128_F64X2_LE);
 	def F64X2_GT = commute_binop(F64X2_LT);	
 	def F64X2_GE = commute_binop(F64X2_LE);
+	def F64X2_MIN = do_vv_v_x2(_, _, V128_F64X2_MIN);
+	def F64X2_MAX = do_vv_v_x2(_, _, V128_F64X2_MAX);
+	def F64X2_ABS = do_v_v_x2(_, V128_F64X2_ABS);
+	def F64X2_PMIN = do_vv_v_x2(_, _, V128_F64X2_PMIN);
+	def F64X2_PMAX = do_vv_v_x2(_, _, V128_F64X2_PMAX);
 
 	// ---- rounding and conversion ----------------------------------------
 	def I32_WRAP_I64	= u32.view<u64>;
@@ -515,10 +525,20 @@ def V128_F32X4_EQ = do_ff_z(_, _, float.==);
 def V128_F32X4_NE = do_ff_z(_, _, float.!=);
 def V128_F32X4_LT = do_ff_z(_, _, float.<);
 def V128_F32X4_LE = do_ff_z(_, _, float.<=);
+def V128_F32X4_MIN = do_ff_f(_, _, V3Eval.F32_MIN);
+def V128_F32X4_MAX = do_ff_f(_, _, V3Eval.F32_MAX);
+def V128_F32X4_ABS = do_f_f(_, float.abs);
+def V128_F32X4_PMIN = do_ii_f(_, _, F32X4_PMIN);
+def V128_F32X4_PMAX = do_ii_f(_, _, F32X4_PMAX);
 def V128_F64X2_EQ = do_dd_z(_, _, double.==);
 def V128_F64X2_NE = do_dd_z(_, _, double.!=);
 def V128_F64X2_LT = do_dd_z(_, _, double.<);
 def V128_F64X2_LE = do_dd_z(_, _, double.<=);
+def V128_F64X2_MIN = do_dd_d(_, _, V3Eval.F64_MIN);
+def V128_F64X2_MAX = do_dd_d(_, _, V3Eval.F64_MAX);
+def V128_F64X2_ABS = do_d_d(_, double.abs);
+def V128_F64X2_PMIN = do_dd_d(_, _, F64X2_PMIN);
+def V128_F64X2_PMAX = do_dd_d(_, _, F64X2_PMAX);
 
 def I8_MIN_S(a: i8, b: i8) -> i8 {
 	return if (a <= b, a, b);
@@ -634,6 +654,26 @@ def I16_Q15_MUL_SAT_S(a: i16, b: i16) -> i16 {
 	var prod = (i32.view(a) * i32.view(b) + 0x4000) >> 15;
 	return if(prod > i16.max, i16.max, i16.view(prod));	
 }
+def F32X4_PMIN(a: float, b: float) -> float {
+	if (a <= b) return a;
+	if (a > b) return b;
+	return a;
+}
+def F32X4_PMAX(a: float, b: float) -> float {
+	if (a >= b) return a;
+	if (a < b) return b;
+	return a;
+}
+def F64X2_PMIN(a: double, b: double) -> double {
+	if (a <= b) return a;
+	if (a > b) return b;
+	return a;
+}
+def F64X2_PMAX(a: double, b: double) -> double {
+	if (a >= b) return a;
+	if (a < b) return b;
+	return a;
+}
 // Adapters
 def do_uu_z_8(a: u8, b: u8, f: (u8, u8) -> bool) -> u8 {  // Adapts a unsigned bool binop to a u8 binop
 	return if (f(a, b), u8.max, u8.view(0));
@@ -694,6 +734,12 @@ def do_ii_i(a: u32, b: u32, f: (i32, i32) -> i32) -> u32 {  // Adapts a signed i
 }
 def do_i_i(a: u32, f: i32 -> i32) -> u32 {  // Adapts a signed i32 unop to a u32 unop
 	return u32.view(f(i32.view(a)));
+}
+def do_ii_f(a: u32, b: u32, f: (float, float) -> float) -> u32 {  // Adapts a signed i32 binop to a float binop
+	var fa = float.view(i32.view(a));
+	var fb = float.view(i32.view(b));
+	var res = f(fa, fb);
+	return u32.view(res);
 }
 def do_ll_l(a: u64, b: u64, f: (i64, i64) -> i64) -> u64 {  // Adapts a signed i64 binop to a u64 binop
 	return u64.view(f(i64.view(a), i64.view(b)));
